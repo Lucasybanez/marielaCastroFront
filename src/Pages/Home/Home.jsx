@@ -1,4 +1,5 @@
 import React from "react";
+import Turnos from "../../assets/components/Turnos";
 
 export default function Home() {
   return (
@@ -12,9 +13,7 @@ export default function Home() {
       {/* Main content layout */}
       <div className="grid grid-cols-3 gap-4 p-6">
         {/* Turnos próximos */}
-        <div className="bg-white rounded-2xl p-4 min-h-[800px] w-2/3 m-auto">
-          {/* Aquí irá el componente de turnos */}
-        </div>
+            <Turnos/>
 
         {/* Área central con botones */}
         <div className="flex flex-col items-center justify-center space-y-6">
