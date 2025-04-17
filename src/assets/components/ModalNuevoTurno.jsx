@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-export default function Turnos() {
+export default function ModalNuevoTurno() {
   const [turnosAgrupados, setTurnosAgrupados] = useState([]);
-  const [cuil, setCuil] = useState('');
+  const [nombre, setNombre] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
 
@@ -22,21 +22,18 @@ export default function Turnos() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const turnoPost = {
-      id_paciente: cuil,
-      fecha,
-      hora,
-    };
     try {
-      await axios.post('http://localhost:8001/api/turno', turnoPost);
-      setCuil('');
+      await axios.post('http://localhost:8001/api/turnos', {
+        nombre,
+        fecha,
+        hora,
+      });
+      setNombre('');
       setFecha('');
       setHora('');
       fetchTurnos(); // recarga los turnos después de agregar uno nuevo
     } catch (error) {
       console.error('Error al crear turno:', error);
-      console.log("-> se intentó", turnoPost);
-
     }
   };
 
@@ -60,10 +57,10 @@ export default function Turnos() {
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-2">
         <input
-          type="number"
-          placeholder="Cuil"
-          value={cuil}
-          onChange={(e) => setCuil(e.target.value)}
+          type="text"
+          placeholder="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
           className="border rounded p-2 w-full"
           required
         />
