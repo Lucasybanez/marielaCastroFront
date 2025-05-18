@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import axios from 'axios';
 
 const CrearPaciente = () => {
+  const [loading, setLoading] = useState(false);
+  const [mensaje, setMensaje] = useState(null);
+
   const initialValues = {
     nombre: '',
     fechaNacimiento: '',
@@ -27,14 +31,19 @@ const CrearPaciente = () => {
     presionBaja: false,
     diabetes: false,
     embarazada: false,
+    cuil: '',               // Agregamos cuil para el POST
+    telefono_familiar: '',  // Lo agrego para el paciente
+    obra_social: '',        // Opcional, si no hay null
   };
 
   const validationSchema = Yup.object({
+    cuil: Yup.string().required('Requerido'),
     nombre: Yup.string().required('Requerido'),
     fechaNacimiento: Yup.date().required('Requerido'),
     domicilio: Yup.string().required('Requerido'),
     localidad: Yup.string().required('Requerido'),
     telefono: Yup.string().required('Requerido'),
+    telefono_familiar: Yup.string(),
     hospitalizado: Yup.string().required('Requerido'),
     tratamientoEnfermedad: Yup.string().required('Requerido'),
     tratamientoOsteoporosis: Yup.string().required('Requerido'),
@@ -49,17 +58,151 @@ const CrearPaciente = () => {
     sangradoExcesivo: Yup.string().required('Requerido'),
   });
 
-  const onSubmit = (values) => {
-    console.log('Datos del formulario:', values);
+  // IDs de preguntas según lo que diste:
+  const preguntasIds = {
+    hospitalizado: 1,
+    tratamientoEnfermedad: 2,
+    tratamientoOsteoporosis: 3,
+    tomaMedicamentos: 4,
+    tratamientoInsulina: 5,
+    tomaBifosfonatos: 6,
+    reaccionAlergica: 7,
+    sangradoExcesivo: 8,
+    problemasCardiacos: 9,
+    artritis: 9,
+    artritisReumatoidea: 9,
+    fiebreReumatica: 9,
+    presionAlta: 9,
+    presionBaja: 9,
+    diabetes: 9,
+    embarazada: 9,
   };
+
+const onSubmit = async (values, { resetForm }) => {
+  setLoading(true);
+  setMensaje(null);
+
+  try {
+    const pacientePayload = {
+      cuil: values.cuil,
+      fecha_nacimiento: values.fechaNacimiento,
+      nombre: values.nombre,
+      telefono: values.telefono,
+      domicilio: values.domicilio,
+      telefono_familiar: values.telefono_familiar || values.telefono,
+      obra_social: values.obra_social || null,
+    };
+
+    const pacienteRes = await axios.post('http://localhost:8001/api/paciente', pacientePayload);
+
+    if (pacienteRes.status !== 200 && pacienteRes.status !== 201) {
+      throw new Error('Error al crear paciente');
+    }
+
+    // POST de preguntas con respuesta
+    const respuestas = [];
+
+    // Preguntas tipo Sí/No
+    const condicionesSalud = [
+  { campo: 'problemasCardiacos', texto: 'problemas cardíacos' },
+  { campo: 'artritis', texto: 'artritis' },
+  { campo: 'artritisReumatoidea', texto: 'artritis reumatoidea' },
+  { campo: 'fiebreReumatica', texto: 'fiebre reumática' },
+  { campo: 'presionAlta', texto: 'presión alta' },
+  { campo: 'presionBaja', texto: 'presión baja' },
+  { campo: 'diabetes', texto: 'diabetes' },
+  { campo: 'embarazada', texto: 'embarazo' },
+];
+
+condicionesSalud.forEach(({ campo, texto }) => {
+  if (values[campo]) {
+    respuestas.push({
+      id_paciente: values.cuil,
+      id_pregunta: preguntasIds.problemasCardiacos, // usamos siempre el ID 9
+      respuesta: texto,
+    });
+  }
+});
+
+
+    // Campo adicional si hay alergia
+    if (values.reaccionAlergica === 'si' && values.alergiaDetalle) {
+      respuestas.push({
+        id_paciente: values.cuil,
+        id_pregunta: preguntasIds.reaccionAlergica,
+        respuesta: values.alergiaDetalle,
+      });
+    }
+
+    // Preguntas booleanas (checkboxes)
+    [
+      'problemasCardiacos',
+      'artritis',
+      'artritisReumatoidea',
+      'fiebreReumatica',
+      'presionAlta',
+      'presionBaja',
+      'diabetes',
+      'embarazada',
+    ].forEach((campo) => {
+      if (values[campo]) {
+        respuestas.push({
+          id_paciente: values.cuil,
+          id_pregunta: preguntasIds[campo],
+          respuesta: 'si',
+        });
+      }
+    });
+
+    // Otra condición
+    if (values.otraCondicion && values.otraCondicion.trim() !== '') {
+      respuestas.push({
+        id_paciente: values.cuil,
+        id_pregunta: preguntasIds.problemasCardiacos, // asumimos que va a la misma categoría
+        respuesta: values.otraCondicion.trim(),
+      });
+    }
+
+    // Enviar todas las respuestas
+    for (const r of respuestas) {
+      await axios.post('http://localhost:8001/api/respuesta', r);
+    }
+
+    setMensaje('Paciente y respuestas guardadas con éxito');
+    //resetForm();
+  } catch (error) {
+    console.error(error);
+    setMensaje('Error al guardar paciente o respuestas');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-md">
       <h2 className="text-2xl font-bold mb-4">Crear Paciente</h2>
+      {mensaje && (
+        <div className={`mb-4 p-2 rounded ${mensaje.includes('Error') ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700'}`}>
+          {mensaje}
+        </div>
+      )}
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         {({ values }) => (
           <Form className="space-y-4">
-            {/* Datos personales */}
+            {/* Agrego el campo cuil y telefono_familiar */}
+            <div>
+              <label className="block font-medium">CUIL</label>
+              <Field name="cuil" type="text" className="w-full border p-2 rounded" />
+              <ErrorMessage name="cuil" component="div" className="text-red-500 text-sm" />
+            </div>
+            <div>
+              <label className="block font-medium">Teléfono Familiar</label>
+              <Field name="telefono_familiar" type="text" className="w-full border p-2 rounded" />
+              <ErrorMessage name="telefono_familiar" component="div" className="text-red-500 text-sm" />
+            </div>
+
+            {/* Datos personales existentes */}
             {[
               { name: 'nombre', label: 'Nombre y Apellido', type: 'text' },
               { name: 'fechaNacimiento', label: 'Fecha de Nacimiento', type: 'date' },
@@ -134,8 +277,14 @@ const CrearPaciente = () => {
               <Field name="otraCondicion" type="text" className="w-full border p-2 rounded" />
             </div>
 
-            <button type="submit" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Guardar Paciente
+            <button
+              type="submit"
+              disabled={loading}
+              className={`mt-4 px-4 py-2 text-white rounded ${
+                loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {loading ? 'Guardando...' : 'Guardar Paciente'}
             </button>
           </Form>
         )}
