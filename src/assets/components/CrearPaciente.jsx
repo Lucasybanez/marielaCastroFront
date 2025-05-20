@@ -51,9 +51,10 @@ const CrearPaciente = () => {
     tratamientoInsulina: Yup.string().required('Requerido'),
     tomaBifosfonatos: Yup.string().required('Requerido'),
     reaccionAlergica: Yup.string().required('Requerido'),
-    alergiaDetalle: Yup.string().when('reaccionAlergica', {
-      is: 'si',
-      then: Yup.string().required('Indique el medicamento'),
+    alergiaDetalle: Yup.string().when('reaccionAlergica', (reaccionAlergica, schema) => {
+      return reaccionAlergica === 'si'
+        ? schema.required('Indique el medicamento')
+        : schema.notRequired();
     }),
     sangradoExcesivo: Yup.string().required('Requerido'),
   });
@@ -77,6 +78,37 @@ const CrearPaciente = () => {
     diabetes: 9,
     embarazada: 9,
   };
+  const guardarHistoriaClinica = async (values) => {
+    console.log("EJECUTANDO GUARDAR HISTORIA CLINICA");
+    console.log("llegó a la función->",values.hospitalizado);
+    const respuestas = [
+      values.hospitalizado,
+      values.tratamientoEnfermedad,
+      values.tratamientoOsteoporosis,
+      values.tomaMedicamentos,
+      values.tratamientoInsulina,
+      values.tomaBifosfonatos,
+      values.alergiaDetalle,
+      values.sangradoExcesivo
+    ]
+    
+    for (let i=1; i<= 8; i++) {
+      const respuesta = {
+        id_paciente: values.cuil,
+        id_pregunta: i,
+        respuesta: respuestas[i-1],
+      };
+      console.log("se intenta guardar respuesta", respuesta);
+      const res = await axios.post('http://localhost:8001/api/respuesta', respuesta).then((res) => {
+        console.log(res.data);
+      }
+      ).catch((err) => {
+        console.log(err);
+      }
+      );
+    }
+  
+};
 
 const onSubmit = async (values, { resetForm }) => {
   setLoading(true);
@@ -94,82 +126,31 @@ const onSubmit = async (values, { resetForm }) => {
     };
 
     const pacienteRes = await axios.post('http://localhost:8001/api/paciente', pacientePayload);
+    console.log(values);
 
     if (pacienteRes.status !== 200 && pacienteRes.status !== 201) {
       throw new Error('Error al crear paciente');
     }
 
-    // POST de preguntas con respuesta
+    // ✅ Guardar preguntas tipo historia clínica (las 8 tipo "sí/no")
+    await guardarHistoriaClinica(values);
+
+    // ✅ Guardar otras respuestas (checkboxes, condiciones, etc.)
     const respuestas = [];
 
-    // Preguntas tipo Sí/No
     const condicionesSalud = [
-  { campo: 'problemasCardiacos', texto: 'problemas cardíacos' },
-  { campo: 'artritis', texto: 'artritis' },
-  { campo: 'artritisReumatoidea', texto: 'artritis reumatoidea' },
-  { campo: 'fiebreReumatica', texto: 'fiebre reumática' },
-  { campo: 'presionAlta', texto: 'presión alta' },
-  { campo: 'presionBaja', texto: 'presión baja' },
-  { campo: 'diabetes', texto: 'diabetes' },
-  { campo: 'embarazada', texto: 'embarazo' },
-];
-
-condicionesSalud.forEach(({ campo, texto }) => {
-  if (values[campo]) {
-    respuestas.push({
-      id_paciente: values.cuil,
-      id_pregunta: preguntasIds.problemasCardiacos, // usamos siempre el ID 9
-      respuesta: texto,
-    });
-  }
-});
-
-
-    // Campo adicional si hay alergia
-    if (values.reaccionAlergica === 'si' && values.alergiaDetalle) {
-      respuestas.push({
-        id_paciente: values.cuil,
-        id_pregunta: preguntasIds.reaccionAlergica,
-        respuesta: values.alergiaDetalle,
-      });
-    }
-
-    // Preguntas booleanas (checkboxes)
-    [
-      'problemasCardiacos',
-      'artritis',
-      'artritisReumatoidea',
-      'fiebreReumatica',
-      'presionAlta',
-      'presionBaja',
-      'diabetes',
-      'embarazada',
-    ].forEach((campo) => {
-      if (values[campo]) {
-        respuestas.push({
-          id_paciente: values.cuil,
-          id_pregunta: preguntasIds[campo],
-          respuesta: 'si',
-        });
-      }
-    });
-
-    // Otra condición
-    if (values.otraCondicion && values.otraCondicion.trim() !== '') {
-      respuestas.push({
-        id_paciente: values.cuil,
-        id_pregunta: preguntasIds.problemasCardiacos, // asumimos que va a la misma categoría
-        respuesta: values.otraCondicion.trim(),
-      });
-    }
-
-    // Enviar todas las respuestas
-    for (const r of respuestas) {
-      await axios.post('http://localhost:8001/api/respuesta', r);
-    }
+      { campo: 'problemasCardiacos', texto: 'problemas cardíacos' },
+      { campo: 'artritis', texto: 'artritis' },
+      { campo: 'artritisReumatoidea', texto: 'artritis reumatoidea' },
+      { campo: 'fiebreReumatica', texto: 'fiebre reumática' },
+      { campo: 'presionAlta', texto: 'presión alta' },
+      { campo: 'presionBaja', texto: 'presión baja' },
+      { campo: 'diabetes', texto: 'diabetes' },
+      { campo: 'embarazada', texto: 'embarazo' },
+    ]
 
     setMensaje('Paciente y respuestas guardadas con éxito');
-    //resetForm();
+    // resetForm();
   } catch (error) {
     console.error(error);
     setMensaje('Error al guardar paciente o respuestas');
@@ -177,6 +158,7 @@ condicionesSalud.forEach(({ campo, texto }) => {
     setLoading(false);
   }
 };
+
 
 
   return (
@@ -227,7 +209,6 @@ condicionesSalud.forEach(({ campo, texto }) => {
               ['tomaMedicamentos', 'Está tomando algún medicamento?'],
               ['tratamientoInsulina', 'Está bajo tratamiento por insulina?'],
               ['tomaBifosfonatos', 'Está tomando bifosfonatos?'],
-              ['reaccionAlergica', 'Tuvo alguna vez reacciones alérgicas con algún medicamento?'],
               ['sangradoExcesivo', '¿Cuando se lastima o extrae algún diente, le sangra excesivamente y necesita atención para detener el sangrado?'],
             ].map(([name, label]) => (
               <div key={name}>
@@ -243,15 +224,27 @@ condicionesSalud.forEach(({ campo, texto }) => {
                 <ErrorMessage name={name} component="div" className="text-red-500 text-sm" />
               </div>
             ))}
-
-            {/* Campo adicional si hay alergia */}
-            {values.reaccionAlergica === 'si' && (
-              <div>
-                <label className="block font-medium">¿Cuál?</label>
-                <Field name="alergiaDetalle" type="text" className="w-full border p-2 rounded" />
-                <ErrorMessage name="alergiaDetalle" component="div" className="text-red-500 text-sm" />
+            {/* Reacción alérgica */}
+            <div>
+              <label className="block font-medium">¿Tiene alguna reacción alérgica?</label>
+              <div className="flex space-x-4 mt-1">
+                <label>
+                  <Field type="radio" name="reaccionAlergica" value="si" className="mr-1" /> Sí
+                </label>
+                <label>
+                  <Field type="radio" name="reaccionAlergica" value="no" className="mr-1" /> No
+                </label>
               </div>
-            )}
+              <ErrorMessage name="reaccionAlergica" component="div" className="text-red-500 text-sm" />
+              {values.reaccionAlergica === 'si' && (
+                <div>
+                  <label className="block font-medium">Detalle de la reacción</label>
+                  <Field name="alergiaDetalle" type="text" className="w-full border p-2 rounded" />
+                  <ErrorMessage name="alergiaDetalle" component="div" className="text-red-500 text-sm" />
+                </div>
+              )}
+              </div>
+            
 
             {/* Historial de condiciones */}
             <h3 className="text-xl font-semibold mt-6">¿Tuvo?</h3>
