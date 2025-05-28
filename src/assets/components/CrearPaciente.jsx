@@ -109,6 +109,55 @@ const CrearPaciente = () => {
     }
   
 };
+const guardarCondiciones = async (values) => {
+  
+  console.log("CORRIENDO GUARDAR CONDICIONES");
+
+  // Filtrar solo las claves que estén en true (condiciones seleccionadas)
+  console.log("VUALUES->",values);
+  const condicionesSeleccionadas = Object.entries(values)
+    .filter(([key, value]) => value === true)
+    .map(([key]) => key);
+  console.log("Condiciones seleccionadas:", condicionesSeleccionadas);
+  for (const cond of condicionesSeleccionadas) {
+    const condicion = {
+      id_paciente: values.cuil,  
+      id_pregunta: 9,
+      respuesta: cond,
+    };
+
+    
+    try {
+      console.log("EJECUTANDO GUARDAR CONDICION:", condicion);
+      const res = await axios.post('http://localhost:8001/api/respuestas', condicion);
+      console.log(res.data);
+    } catch (error) {
+      console.error('Error al guardar condición:', error);
+    }
+    
+  }
+
+  // Si el campo de texto libre 'otraCondicion' existe y no está vacío, lo guardo también
+  console.log("Se debería guardar la otra condición:" , values.otraCondicion);
+  if (values.otraCondicion && values.otraCondicion.trim() !== "") {
+    const condicionLibre = {
+      id_paciente: values.cuil,
+      id_pregunta: 9,
+      respuesta: values.otraCondicion.trim(),
+    };
+    
+    try {
+      console.log("EJECUTANDO GUARDAR CONDICION LIBRE");
+      const res = await axios.post('http://localhost:8001/api/respuestas', condicionLibre);
+      console.log(res.data);
+    } catch (error) {
+      console.error('Error al guardar condición libre:', error);
+    }
+    
+  }
+};
+
+
 
 const onSubmit = async (values, { resetForm }) => {
   setLoading(true);
@@ -124,33 +173,20 @@ const onSubmit = async (values, { resetForm }) => {
       telefono_familiar: values.telefono_familiar || values.telefono,
       obra_social: values.obra_social || null,
     };
-
+    
     const pacienteRes = await axios.post('http://localhost:8001/api/paciente', pacientePayload);
     console.log(values);
-
+    
     if (pacienteRes.status !== 200 && pacienteRes.status !== 201) {
       throw new Error('Error al crear paciente');
     }
-
+    
     // ✅ Guardar preguntas tipo historia clínica (las 8 tipo "sí/no")
     await guardarHistoriaClinica(values);
-
-    // ✅ Guardar otras respuestas (checkboxes, condiciones, etc.)
-    const respuestas = [];
-
-    const condicionesSalud = [
-      { campo: 'problemasCardiacos', texto: 'problemas cardíacos' },
-      { campo: 'artritis', texto: 'artritis' },
-      { campo: 'artritisReumatoidea', texto: 'artritis reumatoidea' },
-      { campo: 'fiebreReumatica', texto: 'fiebre reumática' },
-      { campo: 'presionAlta', texto: 'presión alta' },
-      { campo: 'presionBaja', texto: 'presión baja' },
-      { campo: 'diabetes', texto: 'diabetes' },
-      { campo: 'embarazada', texto: 'embarazo' },
-    ]
+    await guardarCondiciones(values);
 
     setMensaje('Paciente y respuestas guardadas con éxito');
-    // resetForm();
+    //resetForm();
   } catch (error) {
     console.error(error);
     setMensaje('Error al guardar paciente o respuestas');
