@@ -6,7 +6,7 @@ export default function BuscarPaciente() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8001/api/pacientes")
+    fetch("http://localhost:5050/api/pacientes")
       .then((res) => res.json())
       .then((data) => setPacientes(data))
       .catch((error) => console.error("Error al obtener pacientes:", error));

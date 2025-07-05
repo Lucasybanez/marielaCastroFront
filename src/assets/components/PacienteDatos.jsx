@@ -1,18 +1,32 @@
 import { useParams } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import PiezaOdontograma from './PiezaOdontograma'
 import axios from 'axios'
 
 export default function PacienteDatos() {
-   const location = useLocation()
+  const location = useLocation()
   const paciente = location.state?.paciente
-    console.log("Llegó->",paciente)
+  console.log("Llegó->", paciente)
   const [preguntas, setPreguntas] = useState([])
+  const [atenciones, setAtenciones] = useState([]) // <--- NUEVO
 
   useEffect(() => {
-    axios.get(`http://localhost:8001/api/respuestas/paciente/${paciente.cuil}`)
-      .then(response => {setPreguntas(response.data);console.log(response.data)})
+    axios.get(`http://localhost:5050/api/respuestas/paciente/${paciente.cuil}`)
+      .then(response => {
+        setPreguntas(response.data)
+        console.log("RESPUESTAS->", response.data)
+      })
       .catch(error => console.error('Error al cargar preguntas:', error))
+
+    // <-- SEGUNDA PETICIÓN GET
+    axios.get('http://localhost:5050/api/atenciones')
+      .then(response => {
+        const filtradas = response.data.filter(a => a.id_paciente === paciente.cuil)
+        setAtenciones(filtradas)
+        console.log("ATENCIONES->", filtradas)
+      })
+      .catch(error => console.error('Error al cargar atenciones:', error))
   }, [])
 
   const calcularEdad = (fechaNacimiento) => {
@@ -29,11 +43,10 @@ export default function PacienteDatos() {
   }
   const edad = calcularEdad(paciente.fecha_nacimiento)
 
-
   if (!paciente) return <div>Cargando datos del paciente...</div>
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white">
+     <div className="p-6 mx-auto bg-white">
       <h2 className="text-3xl font-bold mb-6">Datos del paciente cuil #{paciente.cuil}</h2>
 
       <div className="border rounded-lg overflow-hidden">
@@ -60,21 +73,57 @@ export default function PacienteDatos() {
          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-4 text-sm border-t">
           <div>Hospitalizado en estos dos años: {preguntas && preguntas[0] && (
     <span className="text-green-600 font-semibold">
-      {preguntas[0].respuesta}
+      {preguntas[0].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
     </span>
   )}</div>
-          <div>Problemas cardíacos: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Está bajo algún tratamiento: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Artritis: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Tratamiento por osteoporosis: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Artritis reumatoidea: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Está bajo tratamiento con insulina: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Fiebre reumática: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Está tomando bifosfonatos: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Problemas de presión: <span className="text-green-600 font-semibold">No</span></div>
-          <div>Tuvo reacciones alérgicas: <span className="text-red-600 font-semibold">Sí</span></div>
-          <div>Está embarazada: <span className="text-green-600 font-semibold">No</span></div>
+            <div>Está bajo algún tratamiento médico: {preguntas && preguntas[1] && (
+    <span className="text-green-600 font-semibold">
+      {preguntas[1].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+    </span>
+  )}</div>
+          <div>Tratamiento por osteoporosis: {preguntas && preguntas[2] && (
+    <span className="text-green-600 font-semibold">
+      {preguntas[2].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+    </span>
+  )}</div>
+          <div>Tratamiento por insulina: {preguntas && preguntas[4] && (
+    <span className="text-green-600 font-semibold">
+      {preguntas[4].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+    </span>
+  )}</div>
+            <div>Toma bifosfonatos: {preguntas && preguntas[5] && (
+    <span className="text-green-600 font-semibold">
+      {preguntas[5].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+    </span>
+  )}</div>
+      <div>Reacción alérgica: {preguntas && preguntas[6] && (
+<span className="text-red-600 font-semibold">
+{preguntas[6].respuesta}
+</span>
+)}</div>
+            <div>Sangrado excesivo por extracción: {preguntas && preguntas[7] && (
+    <span className="text-green-600 font-semibold">
+      {preguntas[7].respuesta}
+    </span>
+  )}</div>
         </div>
+        <div className='m-4 text-black font-semibold'>
+          <p className>Condiciones presentadas:</p>
+          {preguntas.some(p => p.id_pregunta === 9) ? (
+            preguntas
+              .filter(p => p.id_pregunta === 9)
+              .map((p, index) => (
+                <span key={index} className="m-1 text-red-500 font-normal">
+                  {p.respuesta
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())},
+                </span>
+              ))
+          ) : (
+            <div className="m-4 text-gray-500">No hay condiciones presentadas.</div>
+          )}
+        </div>
+
       
       </div>
       
@@ -83,7 +132,23 @@ export default function PacienteDatos() {
         <a href="#" className="text-blue-700 underline">Ver más datos</a>
       </div>
 
+                <h2 className="text-3xl font-bold mt-10 mb-4">Odontograma</h2>
+      <PiezaOdontograma/>
+      
       <h2 className="text-3xl font-bold mt-10 mb-4">Historial</h2>
+      <div className="my-4 flex justify-end">
+  <button
+    onClick={() => {
+        
+        window.location.href = `/atenciones?cuil=${encodeURIComponent(paciente.cuil)}`;
+      }
+    }
+    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
+  >
+    Registrar atención
+  </button>
+</div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto border-collapse">
           <thead>
@@ -92,21 +157,31 @@ export default function PacienteDatos() {
               <th className="border px-4 py-2">Prestación</th>
               <th className="border px-4 py-2">Pieza</th>
               <th className="border px-4 py-2">Lesión</th>
+              <th className="border px-4 py-2">Observaciones</th>
               <th className="border px-4 py-2">Importe</th>
               <th className="border px-4 py-2">Pagos</th>
               <th className="border px-4 py-2">Saldo</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="border px-4 py-2 h-10">05/01/2023</td>
-              <td className="border px-4 py-2">Limpieza</td>
-              <td className="border px-4 py-2">15</td>
-              <td className="border px-4 py-2">Caries</td>
-              <td className="border px-4 py-2">$3.500</td>
-              <td className="border px-4 py-2">$3.500</td>
-              <td className="border px-4 py-2">$0</td>
-            </tr>
+            {atenciones.length > 0 ? (
+              atenciones.map((a, index) => (
+                <tr key={index}>
+                  <td className="border px-4 py-2 h-10">{a.fecha}</td>
+                  <td className="border px-4 py-2">{a.prestacion}</td>
+                  <td className="border px-4 py-2">{a.pieza}</td>
+                  <td className="border px-4 py-2">{a.lesion}</td>
+                  <td className="border px-4 py-2">{a.observaciones}</td>
+                  <td className="border px-4 py-2">${a.importe}</td>
+                  <td className="border px-4 py-2">${a.pagos}</td>
+                  <td className="border px-4 py-2">${a.saldo}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center border py-4 text-gray-500">No hay atenciones registradas.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

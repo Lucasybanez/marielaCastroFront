@@ -1,6 +1,7 @@
 import React from "react";
 import Turnos from "../../assets/components/Turnos";
 import { useNavigate } from "react-router-dom";
+import logo from "../../../public/logo.jpeg"; // Adjust the path as necessary
 
 export default function Home() {
     const navigate = useNavigate();
@@ -9,7 +10,7 @@ export default function Home() {
     <div className="min-h-screen bg-blue-500">
       {/* Header */}
       <header className="bg-blue-800 text-white px-6 py-4 flex items-center space-x-4">
-        <img src="/tooth-icon.png" alt="Icono" className="w-8 h-8" />
+        <img src={logo} alt="Icono" className="w-8 h-8" />
         <h1 className="text-xl font-semibold">Mariela Castro</h1>
       </header>
 
@@ -20,7 +21,7 @@ export default function Home() {
 
         {/* Área central con botones */}
         <div className="flex flex-col items-center justify-center space-y-6">
-          <div className="w-28 h-28 bg-white rounded-full" />
+          <img src={logo} className="w-40 h-40 bg-white rounded-full" />
           <button onClick={() => navigate(`/buscar`)} className="bg-blue-800 text-white font-semibold px-6 py-2 rounded-xl">
             Buscar paciente
           </button>
