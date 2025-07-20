@@ -38,7 +38,7 @@ const FormAtenciones = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:5050/api/atencion', payload);
+      const response = await axios.post('http://localhost:8001/api/atencion', payload);
       alert('Atención registrada correctamente');
       navigate(`/paciente`, { state: { cuil } })
       resetForm();

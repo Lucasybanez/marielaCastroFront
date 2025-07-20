@@ -16,7 +16,7 @@ export default function Turnos() {
 
   const fetchTurnos = async () => {
     try {
-      const res = await axios.get('http://localhost:5050/api/turnos');
+      const res = await axios.get('http://localhost:8001/api/turnos');
       setTurnosAgrupados(res.data);
     } catch (error) {
       console.error('Error al cargar turnos:', error);
@@ -33,11 +33,11 @@ export default function Turnos() {
 
     try {
       if (modoEdicion) {
-        await axios.put(`http://localhost:5050/api/turno/${idTurnoEditando}`, turnoPost);
+        await axios.put(`http://localhost:8001/api/turno/${idTurnoEditando}`, turnoPost);
         setModoEdicion(false);
         setIdTurnoEditando(null);
       } else {
-        await axios.post('http://localhost:5050/api/turno', turnoPost);
+        await axios.post('http://localhost:8001/api/turno', turnoPost);
       }
       setCuil('');
       setFecha('');
@@ -61,7 +61,7 @@ export default function Turnos() {
 
   const handleEliminar = async (id_turno) => {
     try {
-      await axios.delete(`http://localhost:5050/api/turno/${id_turno}`);
+      await axios.delete(`http://localhost:8001/api/turno/${id_turno}`);
       fetchTurnos();
     } catch (error) {
       console.error('Error al eliminar turno:', error);

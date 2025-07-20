@@ -13,7 +13,7 @@ export default function ModalNuevoTurno() {
 
   const fetchTurnos = async () => {
     try {
-      const res = await axios.get('http://localhost:5050/api/turnos');
+      const res = await axios.get('http://localhost:8001/api/turnos');
       setTurnosAgrupados(res.data);
     } catch (error) {
       console.error('Error al cargar turnos:', error);
@@ -23,7 +23,7 @@ export default function ModalNuevoTurno() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5050/api/turnos', {
+      await axios.post('http://localhost:8001/api/turnos', {
         nombre,
         fecha,
         hora,

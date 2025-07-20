@@ -99,7 +99,7 @@ const CrearPaciente = () => {
         respuesta: respuestas[i-1],
       };
       console.log("se intenta guardar respuesta", respuesta);
-      const res = await axios.post('http://localhost:5050/api/respuesta', respuesta).then((res) => {
+      const res = await axios.post('http://localhost:8001/api/respuesta', respuesta).then((res) => {
         console.log(res.data);
       }
       ).catch((err) => {
@@ -129,7 +129,7 @@ const guardarCondiciones = async (values) => {
     
     try {
       console.log("EJECUTANDO GUARDAR CONDICION:", condicion);
-      const res = await axios.post('http://localhost:5050/api/respuesta', condicion);
+      const res = await axios.post('http://localhost:8001/api/respuesta', condicion);
       console.log(res.data);
     } catch (error) {
       console.error('Error al guardar condición:', error);
@@ -148,7 +148,7 @@ const guardarCondiciones = async (values) => {
     
     try {
       console.log("EJECUTANDO GUARDAR CONDICION LIBRE");
-      const res = await axios.post('http://localhost:5050/api/respuesta', condicionLibre);
+      const res = await axios.post('http://localhost:8001/api/respuesta', condicionLibre);
       console.log(res.data);
     } catch (error) {
       console.error('Error al guardar condición libre:', error);
@@ -174,7 +174,7 @@ const onSubmit = async (values, { resetForm }) => {
       obra_social: values.obra_social || null,
     };
     
-    const pacienteRes = await axios.post('http://localhost:5050/api/paciente', pacientePayload);
+    const pacienteRes = await axios.post('http://localhost:8001/api/paciente', pacientePayload);
     console.log(values);
     
     if (pacienteRes.status !== 200 && pacienteRes.status !== 201) {

@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import PiezaOdontograma from './PiezaOdontograma'
 import axios from 'axios'
+import Odontograma from './Odontograma'
+import OdontogramaInfantil from './OdontogramaInfantil'
 
 export default function PacienteDatos() {
   const location = useLocation()
@@ -12,7 +14,7 @@ export default function PacienteDatos() {
   const [atenciones, setAtenciones] = useState([]) // <--- NUEVO
 
   useEffect(() => {
-    axios.get(`http://localhost:5050/api/respuestas/paciente/${paciente.cuil}`)
+    axios.get(`http://localhost:8001/api/respuestas/paciente/${paciente.cuil}`)
       .then(response => {
         setPreguntas(response.data)
         console.log("RESPUESTAS->", response.data)
@@ -20,7 +22,7 @@ export default function PacienteDatos() {
       .catch(error => console.error('Error al cargar preguntas:', error))
 
     // <-- SEGUNDA PETICIÓN GET
-    axios.get('http://localhost:5050/api/atenciones')
+    axios.get('http://localhost:8001/api/atenciones')
       .then(response => {
         const filtradas = response.data.filter(a => a.id_paciente === paciente.cuil)
         setAtenciones(filtradas)
@@ -133,7 +135,8 @@ export default function PacienteDatos() {
       </div>
 
                 <h2 className="text-3xl font-bold mt-10 mb-4">Odontograma</h2>
-      <PiezaOdontograma/>
+      <Odontograma cuil={paciente.cuil} />
+      <OdontogramaInfantil cuil={paciente.cuil} />
       
       <h2 className="text-3xl font-bold mt-10 mb-4">Historial</h2>
       <div className="my-4 flex justify-end">
