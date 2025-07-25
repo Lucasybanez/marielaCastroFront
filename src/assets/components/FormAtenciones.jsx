@@ -8,7 +8,9 @@ import { useNavigate } from "react-router-dom";
 const FormAtenciones = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const cuil = searchParams.get('cuil') || '';
+  const location = useLocation()
+  const paciente = location.state?.paciente
+  const cuil = paciente ? paciente.cuil : searchParams.get('cuil') || '';
 
   const initialValues = {
     fecha: '',
@@ -40,7 +42,7 @@ const FormAtenciones = () => {
     try {
       const response = await axios.post('http://localhost:8001/api/atencion', payload);
       alert('Atención registrada correctamente');
-      navigate(`/paciente`, { state: { cuil } })
+      navigate(`/paciente`, { state: { paciente } })
       resetForm();
     } catch (error) {
       console.error('Error al enviar:', error);

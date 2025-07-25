@@ -9,6 +9,7 @@ export default function Turnos() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idTurnoEditando, setIdTurnoEditando] = useState(null);
   const [menuAbierto, setMenuAbierto] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchTurnos();
@@ -23,31 +24,39 @@ export default function Turnos() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const turnoPost = {
-      id_paciente: cuil,
-      fecha,
-      hora,
-    };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      if (modoEdicion) {
-        await axios.put(`http://localhost:8001/api/turno/${idTurnoEditando}`, turnoPost);
-        setModoEdicion(false);
-        setIdTurnoEditando(null);
-      } else {
-        await axios.post('http://localhost:8001/api/turno', turnoPost);
-      }
-      setCuil('');
-      setFecha('');
-      setHora('');
-      fetchTurnos();
-    } catch (error) {
-      console.error('Error al guardar turno:', error);
-      console.log("->", turnoPost);
-    }
+  if (!cuil.trim() || !fecha || !hora) {
+    setError('Todos los campos son obligatorios');
+    return;
+  }
+
+  setError(''); // limpiamos si pasa la validación
+
+  const turnoPost = {
+    paciente: cuil.trim(),
+    fecha,
+    hora,
   };
+
+  try {
+    if (modoEdicion) {
+      await axios.put(`http://localhost:8001/api/turno/${idTurnoEditando}`, turnoPost);
+      setModoEdicion(false);
+      setIdTurnoEditando(null);
+    } else {
+      await axios.post('http://localhost:8001/api/turno', turnoPost);
+    }
+    setCuil('');
+    setFecha('');
+    setHora('');
+    fetchTurnos();
+  } catch (error) {
+    console.error('Error al guardar turno:', error);
+  }
+};
+
 
   const handleEditar = (turno) => {
     console.log("->",turno)
@@ -77,14 +86,14 @@ export default function Turnos() {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 w-full shadow-md flex flex-col justify-between h-full">
-      <div>
-        {turnosAgrupados.map((dia, index) => (
-          <div key={index} className="mb-4">
-            <h2 className="font-bold text-lg mb-2">{dia.fecha}</h2>
-            <div className="flex flex-col gap-1">
-              {dia.turnos.map((turno) => (
-                <div key={turno.id} className="flex items-center justify-between">
+      <div className="bg-white rounded-2xl p-4 w-full shadow-md flex flex-col justify-between h-full">
+        <div className="overflow-y-auto max-h-[500px] pr-2">
+          {turnosAgrupados.map((dia, index) => (
+            <div key={index} className="mb-4">
+              <h2 className="font-bold text-lg mb-2">{dia.fecha}</h2>
+              <div className="flex flex-col gap-1">
+                {dia.turnos.map((turno) => (
+                  <div key={turno.id} className="flex items-center justify-between">
                     <span className="text-green-700 font-medium">{turno.hora}</span>
                     <span className="text-gray-600">{turno.nombre}</span>
                     <div className="flex gap-2">
@@ -101,20 +110,25 @@ export default function Turnos() {
                         <i className="fas fa-trash"></i>
                       </button>
                     </div>
-
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+
+      {error && (
+        <div className="text-red-600 font-semibold bg-red-100 border border-red-400 p-2 rounded">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-2">
         <input
           type="text"
           value={cuil}
           onChange={(e) => setCuil(e.target.value)}
-          placeholder="CUIL del paciente"
+          placeholder="Nombre del paciente"
           className="border p-2 rounded"
         />
         <input

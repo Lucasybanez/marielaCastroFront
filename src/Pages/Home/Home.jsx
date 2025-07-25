@@ -2,6 +2,8 @@ import React from "react";
 import Turnos from "../../assets/components/Turnos";
 import { useNavigate } from "react-router-dom";
 import logo from "../../../public/logo.jpeg"; // Adjust the path as necessary
+import PanelDeudores from "../../assets/components/PanelDeudores";
+
 
 export default function Home() {
     const navigate = useNavigate();
@@ -21,7 +23,7 @@ export default function Home() {
 
         {/* Área central con botones */}
         <div className="flex flex-col items-center justify-center space-y-6">
-          <img src={logo} className="w-40 h-40 bg-white rounded-full" />
+          <img src={logo} className="w-60 h-60 bg-white rounded-full" />
           <button onClick={() => navigate(`/buscar`)} className="bg-blue-800 text-white font-semibold px-6 py-2 rounded-xl">
             Buscar paciente
           </button>
@@ -32,7 +34,7 @@ export default function Home() {
 
         {/* Cobros pendientes */}
         <div className="bg-white rounded-2xl p-4 min-h-[800px] w-2/3 m-auto">
-          {/* Aquí irá el componente de cobros */}
+          <PanelDeudores />
         </div>
       </div>
     </div>
