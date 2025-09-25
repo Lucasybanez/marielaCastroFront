@@ -75,93 +75,97 @@ export default function PacienteDatos() {
       >
         ✏️ Editar datos
       </button>
-      <div className="border rounded-lg overflow-hidden">
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 bg-blue-50 font-semibold text-blue-900 p-4">
-          
-          <div>Nombre y apellido:</div>
-          <div className="md:col-span-2 text-black font-normal">{paciente.nombre}</div>
+<div className="border rounded-lg overflow-hidden">
+  
+  <div className="grid grid-cols-1 md:grid-cols-3 bg-blue-50 font-semibold text-blue-900 p-4 text-lg">
+    
+    <div>Nombre y apellido:</div>
+    <div className="md:col-span-2 text-black font-normal">{paciente.nombre}</div>
 
-          <div>Fecha de nacimiento:</div>
-          <div className="md:col-span-2 text-black font-normal">{paciente.fecha_nacimiento}</div>
+    <div>Fecha de nacimiento:</div>
+    <div className="md:col-span-2 text-black font-normal">{paciente.fecha_nacimiento}</div>
 
-          <div>Edad:</div>
-          <div className="md:col-span-2 text-black font-normal">{edad} años</div>
+    <div>Edad:</div>
+    <div className="md:col-span-2 text-black font-normal">{edad} años</div>
 
-          <div>Domicilio:</div>
-          <div className="md:col-span-2 text-black font-normal">{paciente.domicilio}</div>
+    <div>Domicilio:</div>
+    <div className="md:col-span-2 text-black font-normal">{paciente.domicilio}</div>
 
-          <div>Localidad:</div>
-          <div className="md:col-span-2 text-black font-normal">{paciente.localidad}</div>
+    <div>Localidad:</div>
+    <div className="md:col-span-2 text-black font-normal">{paciente.localidad}</div>
 
-          <div>Teléfono:</div>
-          <div className="md:col-span-2 text-black font-normal">{paciente.telefono}</div>
-        </div>
+    <div>Teléfono:</div>
+    <div className="md:col-span-2 text-black font-normal">{paciente.telefono}</div>
+  </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-4 text-sm border-t">
-          <div>Hospitalizado en estos dos años: {preguntas && preguntas[0] && (
-            <span className={preguntas[0].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-              {preguntas[0].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
-            </span>
-          )}</div>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-4 text-base border-t">
+    <div>Hospitalizado en estos dos años: {preguntas && preguntas[0] && (
+      <span className={preguntas[0].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+        {preguntas[0].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+      </span>
+    )}</div>
 
-          <div>Está bajo algún tratamiento médico: {preguntas && preguntas[1] && (
-            <span className={preguntas[1].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-              {preguntas[1].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
-            </span>
-          )}</div>
+    <div>Está bajo algún tratamiento médico: {preguntas && preguntas[1] && (
+      <span className={preguntas[1].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+        {preguntas[1].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+      </span>
+    )}</div>
 
-          <div>Tratamiento por osteoporosis: {preguntas && preguntas[2] && (
-            <span className={preguntas[2].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-              {preguntas[2].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
-            </span>
-          )}</div>
+    <div>Tratamiento por osteoporosis: {preguntas && preguntas[2] && (
+      <span className={preguntas[2].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+        {preguntas[2].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+      </span>
+    )}</div>
 
-          <div>Tratamiento por insulina: {preguntas && preguntas[4] && (
-            <span className={preguntas[4].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-              {preguntas[4].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
-            </span>
-          )}</div>
+    <div>Tratamiento por insulina: {preguntas && preguntas[4] && (
+      <span className={preguntas[4].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+        {preguntas[4].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+      </span>
+    )}</div>
 
-          <div>Toma bifosfonatos: {preguntas && preguntas[5] && (
-            <span className={preguntas[5].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-              {preguntas[5].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
-            </span>
-          )}</div>
+    <div>Toma bifosfonatos: {preguntas && preguntas[5] && (
+      <span className={preguntas[5].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+        {preguntas[5].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+      </span>
+    )}</div>
 
-          <div>Reacción alérgica: {preguntas && preguntas[6] && (
-            <span className="text-red-600 font-semibold">
-              {preguntas[6].respuesta}
-            </span>
-          )}</div>
+    <div>Reacción alérgica: {preguntas && preguntas[6] && (
+      <span className="text-red-600 font-semibold">
+        {preguntas[6].respuesta}
+      </span>
+    )}</div>
 
-          <div>Sangrado excesivo por extracción: {preguntas && preguntas[7] && (
-            <span className={preguntas[7].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-              {preguntas[7].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
-            </span>
-          )}</div>
-        </div>
-        <div className='m-4 text-black font-semibold'>
-          <p className>Condiciones presentadas:</p>
-          {preguntas.some(p => p.id_pregunta === 9) ? (
-            preguntas
-              .filter(p => p.id_pregunta === 9)
-              .map((p, index) => (
-                <span key={index} className="m-1 text-red-500 font-normal">
-                  {p.respuesta
-                    .replace(/([A-Z])/g, ' $1')
-                    .replace(/^./, str => str.toUpperCase())},
-                </span>
-              ))
-          ) : (
-            <div className="m-4 text-gray-500">No hay condiciones presentadas.</div>
-          )}
-        </div>
-      </div>
+    <div>Sangrado excesivo por extracción: {preguntas && preguntas[7] && (
+      <span className={preguntas[7].respuesta.toLowerCase() === 'si' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+        {preguntas[7].respuesta.toLowerCase() === 'si' ? 'Sí' : 'No'}
+      </span>
+    )}</div>
+  </div>
+
+  <div className='m-4 text-black font-semibold text-lg'>
+    <p className="text-lg">Condiciones presentadas:</p>
+    {preguntas.some(p => p.id_pregunta === 9) ? (
+      preguntas
+        .filter(p => p.id_pregunta === 9)
+        .map((p, index) => (
+          <span key={index} className="m-1 text-red-500 font-normal text-base">
+            {p.respuesta
+              .replace(/([A-Z])/g, ' $1')
+              .replace(/^./, str => str.toUpperCase())},
+          </span>
+        ))
+    ) : (
+      <div className="m-4 text-gray-500 text-base">No hay condiciones presentadas.</div>
+    )}
+  </div>
+</div>
+
 
       <h2 className="text-3xl font-bold mt-10 mb-4">Odontograma</h2>
-      <Odontograma cuil={paciente.cuil} />
-      <OdontogramaInfantil cuil={paciente.cuil} />
+      <div className='transform scale-85'>
+        <Odontograma cuil={paciente.cuil} />
+        <OdontogramaInfantil cuil={paciente.cuil} />
+      </div>
 
       <h2 className="text-3xl font-bold mt-10 mb-4">Historial</h2>
       <div className="my-4 flex justify-end">

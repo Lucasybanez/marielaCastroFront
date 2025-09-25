@@ -203,8 +203,8 @@ const EditarPaciente = () => {
             <Form className="space-y-4">
               {/* Campos personales */}
               <div>
-                <label className="block font-medium">CUIL</label>
-                <Field name="cuil" type="text" className="w-full border p-2 rounded" />
+                <label className="block color-gray font-medium">CUIL</label>
+                <Field name="cuil" type="text" className="w-full border p-2 rounded" disabled={true} />
                 <ErrorMessage name="cuil" component="div" className="text-red-500 text-sm" />
               </div>
               <div>
