@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import Navbar from "./Navbar"; // Asegurate de importar correctamente
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const CrearPaciente = () => {
   const [loading, setLoading] = useState(false);
@@ -158,7 +160,6 @@ const guardarCondiciones = async (values) => {
 };
 
 
-
 const onSubmit = async (values, { resetForm }) => {
   setLoading(true);
   setMensaje(null);
@@ -173,23 +174,48 @@ const onSubmit = async (values, { resetForm }) => {
       telefono_familiar: values.telefono_familiar || values.telefono,
       obra_social: values.obra_social || null,
     };
-    
+
     const pacienteRes = await axios.post('http://localhost:8001/api/paciente', pacientePayload);
-    console.log(values);
-    
-    if (pacienteRes.status !== 200 && pacienteRes.status !== 201) {
+
+    if (![200, 201].includes(pacienteRes.status)) {
       throw new Error('Error al crear paciente');
     }
-    
+
     // ✅ Guardar preguntas tipo historia clínica (las 8 tipo "sí/no")
     await guardarHistoriaClinica(values);
     await guardarCondiciones(values);
 
     setMensaje('Paciente y respuestas guardadas con éxito');
     resetForm();
+
+    // 🔔 SweetAlert de éxito
+    Swal.fire({
+      icon: 'success',
+      title: '¡Éxito!',
+      text: 'Paciente y respuestas guardadas con éxito',
+      confirmButtonColor: '#2563eb' // azul tailwind
+    });
+
   } catch (error) {
-    console.error(error);
-    setMensaje('Error al guardar paciente o respuestas');
+    let mensajeError = 'Error inesperado al guardar paciente o respuestas';
+
+    if (error.response) {
+      console.error("Error del servidor:", error.response.data);
+      mensajeError = error.response.data.mensaje || error.response.data.error || mensajeError;
+    } else {
+      console.error("Error desconocido:", error);
+    }
+
+    setMensaje(mensajeError);
+
+    // 🔔 SweetAlert de error
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: mensajeError,
+      confirmButtonColor: '#dc2626' // rojo tailwind
+    });
+
   } finally {
     setLoading(false);
   }
@@ -197,14 +223,12 @@ const onSubmit = async (values, { resetForm }) => {
 
 
 
+
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Crear Paciente</h2>
-      {mensaje && (
-        <div className={`mb-4 p-2 rounded ${mensaje.includes('Error') ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700'}`}>
-          {mensaje}
-        </div>
-      )}
+    <div>
+      <Navbar titulo="Registrar Paciente" />
+      <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-md">
+      <h2 className="text-2xl font-bold mb-4">Crear ficha de Paciente</h2>
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         {({ values }) => (
           <Form className="space-y-4">
@@ -318,6 +342,7 @@ const onSubmit = async (values, { resetForm }) => {
           </Form>
         )}
       </Formik>
+      </div>
     </div>
   );
 };

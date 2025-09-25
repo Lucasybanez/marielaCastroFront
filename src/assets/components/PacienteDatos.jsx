@@ -19,6 +19,7 @@ export default function PacienteDatos() {
   // PARA PAGOS
   const [showModal, setShowModal] = useState(false)
   const [pagoActual, setPagoActual] = useState(0)
+  const [aunDebe, setAunDebe] = useState(0)
   const [nuevoPago, setNuevoPago] = useState('')
   const [atencionSeleccionada, setAtencionSeleccionada] = useState(null)
   //
@@ -193,6 +194,7 @@ export default function PacienteDatos() {
                       onClick={() => {
                         setPagoActual(a.pagado)
                         setNuevoPago('')
+                        setAunDebe(parseInt(a.importe) - parseInt(a.pagado))
                         setAtencionSeleccionada(a)
                         setShowModal(true)
                       }}
@@ -219,6 +221,7 @@ export default function PacienteDatos() {
           <div className="bg-white p-6 rounded-xl w-96 shadow-lg">
             <h3 className="text-xl font-bold mb-4">Actualizar pago</h3>
             <p className="mb-2">El paciente ya abonó <span className="font-semibold text-green-600">${parseInt(pagoActual)}</span>.</p>
+            <p className="mb-2">Debe: <span className="font-semibold text-red-500">${parseInt(aunDebe)}</span>.</p>
             <label className="block mb-2">¿Cuánto pagará ahora?</label>
             <input
               type="number"

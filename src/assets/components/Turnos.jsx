@@ -19,6 +19,7 @@ export default function Turnos() {
     try {
       const res = await axios.get('http://localhost:8001/api/turnos');
       setTurnosAgrupados(res.data);
+      console.log(res.data);
     } catch (error) {
       console.error('Error al cargar turnos:', error);
     }
@@ -60,7 +61,7 @@ const handleSubmit = async (e) => {
 
   const handleEditar = (turno) => {
     console.log("->",turno)
-    setCuil(turno.cuil);
+    setCuil(turno.nombre);
     setFecha(turno.fecha);
     setHora(turno.hora);
     setModoEdicion(true);

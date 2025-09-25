@@ -39,32 +39,37 @@ export default function PanelDeudores() {
     }
   };
 
-  return (
-    <div className="flex flex-col h-full">
-      <h2 className="text-xl font-semibold text-center mb-4 text-blue-800">Cobros Pendientes</h2>
+return (
+  <div className="flex flex-col h-full">
+    <h2 className="text-xl font-semibold text-center mb-4 text-blue-800">
+      Cobros Pendientes
+    </h2>
 
-      <div className="overflow-y-auto flex-1 space-y-2 pr-2">
-        {deudores.length === 0 ? (
-          <p className="text-gray-500 text-center">No hay cobros pendientes</p>
-        ) : (
-          deudores.map((d, index) => (
-            <div
-              key={index}
-              className="border rounded-xl p-3 shadow-sm bg-blue-50 flex justify-between items-center cursor-pointer hover:bg-blue-100 transition"
-              onDoubleClick={() => handleDobleClick(d.cuil)}
-              title="Doble click para ver paciente"
-            >
-              <div>
-                <p className="text-sm font-semibold text-blue-900">{d.nombre}</p>
-                <p className="text-xs text-gray-600">Fecha: {new Date(d.fecha).toLocaleDateString()}</p>
-              </div>
-              <div className="text-red-600 font-bold text-sm">
-                ${Number(d.debe).toLocaleString('es-AR')}
-              </div>
+    <div className="overflow-y-auto flex-1 space-y-2 pr-2 max-h-180">
+      {deudores.length === 0 ? (
+        <p className="text-gray-500 text-center">No hay cobros pendientes</p>
+      ) : (
+        deudores.map((d, index) => (
+          <div
+            key={index}
+            className="border rounded-xl p-3 shadow-sm bg-blue-50 flex justify-between items-center cursor-pointer hover:bg-blue-100 transition"
+            onDoubleClick={() => handleDobleClick(d.cuil)}
+            title="Doble click para ver paciente"
+          >
+            <div>
+              <p className="text-sm font-semibold text-blue-900">{d.nombre}</p>
+              <p className="text-xs text-gray-600">
+                Fecha: {new Date(d.fecha).toLocaleDateString()}
+              </p>
             </div>
-          ))
-        )}
-      </div>
+            <div className="text-red-600 font-bold text-sm">
+              ${Number(d.debe).toLocaleString("es-AR")}
+            </div>
+          </div>
+        ))
+      )}
     </div>
-  );
+  </div>
+);
+
 }
