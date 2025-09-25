@@ -69,9 +69,16 @@ export default function PacienteDatos() {
       <Navbar titulo="Perfil paciente" />
     <div className="p-6 mx-auto bg-white">
       <h2 className="text-3xl font-bold mb-6">Datos del paciente cuil #{paciente.cuil}</h2>
-
+      <button
+        onClick={() => navigate("/editar-paciente", { state: { paciente } })}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded m-4"
+      >
+        ✏️ Editar datos
+      </button>
       <div className="border rounded-lg overflow-hidden">
+        
         <div className="grid grid-cols-1 md:grid-cols-3 bg-blue-50 font-semibold text-blue-900 p-4">
+          
           <div>Nombre y apellido:</div>
           <div className="md:col-span-2 text-black font-normal">{paciente.nombre}</div>
 

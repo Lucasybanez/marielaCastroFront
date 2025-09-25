@@ -8,6 +8,7 @@ import CrearPaciente from './assets/components/CrearPaciente'
 import BuscarPaciente from './assets/components/Buscador'
 import PacienteDatos from './assets/components/PacienteDatos'
 import FormAtenciones from './assets/components/FormAtenciones'
+import EditarPaciente from './assets/components/EditarPaciente'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/crear" element={<CrearPaciente />} />
         <Route path="/paciente" element={<PacienteDatos />} />
         <Route path="/atenciones" element={<FormAtenciones />} />
+        <Route path="/editar-paciente" element={<EditarPaciente />} />
       </Routes>
     </Router>
   )
