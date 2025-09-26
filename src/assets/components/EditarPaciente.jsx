@@ -43,32 +43,39 @@ const EditarPaciente = () => {
       .catch(error => console.error('Error al cargar respuestas:', error));
   }, [pacienteExistente]);
 
-  const guardarHistoriaClinica = async (values) => {
-    console.log("EJECUTANDO GUARDAR HISTORIA CLINICA");
-    const respuestasArray = [
-      values.hospitalizado,
-      values.tratamientoEnfermedad,
-      values.tratamientoOsteoporosis,
-      values.tomaMedicamentos,
-      values.tratamientoInsulina,
-      values.tomaBifosfonatos,
-      values.alergiaDetalle,
-      values.sangradoExcesivo
-    ];
+const guardarHistoriaClinica = async (values) => {
+  console.log("EJECUTANDO GUARDAR HISTORIA CLINICA");
 
-    for (let i = 1; i <= 8; i++) {
-      const respuesta = {
+  const preguntas = [
+    { id: 1, key: 'hospitalizado' },
+    { id: 2, key: 'tratamientoEnfermedad' },
+    { id: 3, key: 'tratamientoOsteoporosis' },
+    { id: 4, key: 'tomaMedicamentos' },
+    { id: 5, key: 'tratamientoInsulina' },
+    { id: 6, key: 'tomaBifosfonatos' },
+    { id: 7, key: 'alergiaDetalle' },
+    { id: 8, key: 'sangradoExcesivo' }
+  ];
+
+  try {
+    for (const pregunta of preguntas) {
+      const body = {
         id_paciente: values.cuil,
-        id_pregunta: i,
-        respuesta: respuestasArray[i - 1],
+        id_pregunta: pregunta.id,
+        respuesta: values[pregunta.key] || ''
       };
-      try {
-        await axios.post('http://localhost:8001/api/respuesta', respuesta);
-      } catch (error) {
-        console.error('Error al guardar respuesta:', error);
-      }
+
+      await axios.put('http://localhost:8001/api/respuestas', body);
     }
-  };
+
+    console.log("Historia clínica guardada correctamente");
+  } catch (error) {
+    console.error('Error al guardar respuestas:', error);
+  }
+};
+
+
+
 
   const guardarCondiciones = async (values) => {
     console.log("EJECUTANDO GUARDAR CONDICIONES");

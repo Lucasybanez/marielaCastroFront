@@ -71,12 +71,15 @@ const guardarEnBD = async (parte, contenido) => {
   try {
     if (existente) {
       await axios.put(`http://localhost:8001/api/odontograma/${existente.id}`, payload);
+      console.log("SE INTENTÓ UPDEAR EN BD", payload);
     } else {
       await axios.post("http://localhost:8001/api/odontograma", payload);
+      console.log("SE INTENTÓ GUARDAR EN BD", payload);
       props.onRefresh?.(); // 🔁 actualiza los datos en el padre si existe esta prop
     }
   } catch (error) {
     Swal.fire("Error", "Ocurrió un error al guardar en la base de datos.", "error");
+    console.log("SE INTENTÓ CON ERROR", payload);
   }
 };
 

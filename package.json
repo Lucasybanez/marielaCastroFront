@@ -16,6 +16,7 @@
     "formik": "^2.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-image-lightbox": "^5.1.4",
     "react-router-dom": "^7.6.0",
     "sweetalert2": "^11.22.2",
     "tailwindcss": "^4.1.3",

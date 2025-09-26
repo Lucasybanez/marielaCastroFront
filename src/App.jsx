@@ -9,6 +9,7 @@ import BuscarPaciente from './assets/components/Buscador'
 import PacienteDatos from './assets/components/PacienteDatos'
 import FormAtenciones from './assets/components/FormAtenciones'
 import EditarPaciente from './assets/components/EditarPaciente'
+import GaleriaPaciente from './assets/components/GaleriaPaciente'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/paciente" element={<PacienteDatos />} />
         <Route path="/atenciones" element={<FormAtenciones />} />
         <Route path="/editar-paciente" element={<EditarPaciente />} />
+        <Route path="/galeria" element={<GaleriaPaciente />} />
       </Routes>
     </Router>
   )
