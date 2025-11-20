@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 
 export default function Turnos() {
-  const [turnosAgrupados, setTurnosAgrupados] = useState([]);
+  const [turnos, setTurnos] = useState([]);
   const [cuil, setCuil] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idTurnoEditando, setIdTurnoEditando] = useState(null);
-  const [menuAbierto, setMenuAbierto] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -18,55 +20,55 @@ export default function Turnos() {
   const fetchTurnos = async () => {
     try {
       const res = await axios.get('http://localhost:8001/api/turnos');
-      setTurnosAgrupados(res.data);
-      console.log(res.data);
+      setTurnos(res.data);
     } catch (error) {
       console.error('Error al cargar turnos:', error);
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!cuil.trim() || !fecha || !hora) {
-    setError('Todos los campos son obligatorios');
-    return;
-  }
+    if (!cuil.trim() || !fecha || !hora) {
+      setError('Todos los campos son obligatorios');
+      return;
+    }
 
-  setError(''); // limpiamos si pasa la validación
+    setError('');
 
-  const turnoPost = {
-    paciente: cuil.trim(),
-    fecha,
-    hora,
+    const turnoPost = {
+      paciente: cuil.trim(),
+      fecha,
+      hora,
+    };
+
+    try {
+      if (modoEdicion) {
+        await axios.put(
+          `http://localhost:8001/api/turno/${idTurnoEditando}`,
+          turnoPost
+        );
+        setModoEdicion(false);
+        setIdTurnoEditando(null);
+      } else {
+        await axios.post('http://localhost:8001/api/turno', turnoPost);
+      }
+
+      setCuil('');
+      setFecha('');
+      setHora('');
+      fetchTurnos();
+    } catch (error) {
+      console.error('Error al guardar turno:', error);
+    }
   };
 
-  try {
-    if (modoEdicion) {
-      await axios.put(`http://localhost:8001/api/turno/${idTurnoEditando}`, turnoPost);
-      setModoEdicion(false);
-      setIdTurnoEditando(null);
-    } else {
-      await axios.post('http://localhost:8001/api/turno', turnoPost);
-    }
-    setCuil('');
-    setFecha('');
-    setHora('');
-    fetchTurnos();
-  } catch (error) {
-    console.error('Error al guardar turno:', error);
-  }
-};
-
-
   const handleEditar = (turno) => {
-    console.log("->",turno)
-    setCuil(turno.nombre);
+    setCuil(turno.paciente);
     setFecha(turno.fecha);
     setHora(turno.hora);
     setModoEdicion(true);
     setIdTurnoEditando(turno.id_turno);
-    setMenuAbierto(null);
   };
 
   const handleEliminar = async (id_turno) => {
@@ -86,37 +88,59 @@ const handleSubmit = async (e) => {
     setHora('');
   };
 
+  // 🔵 Agrupamos turnos por fecha real YYYY-MM-DD
+  const turnosPorDia = turnos.reduce((acc, turno) => {
+    if (!acc[turno.fecha]) acc[turno.fecha] = [];
+    acc[turno.fecha].push(turno);
+    return acc;
+  }, {});
+
+  // Convertir YYYY-MM-DD → "Sábado 26/07"
+  const formatearFecha = (fecha) =>
+    dayjs(fecha).format("dddd DD/MM").replace(/^\w/, c => c.toUpperCase());
+
   return (
-      <div className="bg-white rounded-2xl p-4 w-full shadow-md flex flex-col justify-between h-full">
-        <div className="overflow-y-auto max-h-[500px] pr-2">
-          {turnosAgrupados.map((dia, index) => (
-            <div key={index} className="mb-4">
-              <h2 className="font-bold text-lg mb-2">{dia.fecha}</h2>
-              <div className="flex flex-col gap-1">
-                {dia.turnos.map((turno) => (
-                  <div key={turno.id} className="flex items-center justify-between">
-                    <span className="text-green-700 font-medium">{turno.hora}</span>
-                    <span className="text-gray-600">{turno.nombre}</span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEditar(turno)}
-                        className="p-2 text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        <i className="fas fa-pen"></i>
-                      </button>
-                      <button
-                        onClick={() => handleEliminar(turno.id_turno)}
-                        className="p-2 text-red-600 hover:text-red-800 transition-colors"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
+    <div className="bg-white rounded-2xl p-4 w-full shadow-md flex flex-col justify-between h-full">
+
+      <div className="overflow-y-auto max-h-[500px] pr-2">
+        {Object.entries(turnosPorDia).map(([fecha, lista]) => (
+          <div key={fecha} className="mb-4">
+            <h2 className="font-bold text-lg mb-2">
+              {formatearFecha(fecha)}
+            </h2>
+
+            <div className="flex flex-col gap-1">
+              {lista.map((turno) => (
+                <div key={turno.id_turno} className="flex items-center justify-between">
+                  <span className="text-green-700 font-medium">
+                    {turno.hora.slice(0, 5)}
+                  </span>
+
+                  <span className="text-gray-600">
+                    {turno.paciente}
+                  </span>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditar(turno)}
+                      className="p-2 text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      <i className="fas fa-pen"></i>
+                    </button>
+
+                    <button
+                      onClick={() => handleEliminar(turno.id_turno)}
+                      className="p-2 text-red-600 hover:text-red-800 transition-colors"
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
 
       {error && (
         <div className="text-red-600 font-semibold bg-red-100 border border-red-400 p-2 rounded">

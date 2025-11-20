@@ -10,6 +10,7 @@ import PacienteDatos from './assets/components/PacienteDatos'
 import FormAtenciones from './assets/components/FormAtenciones'
 import EditarPaciente from './assets/components/EditarPaciente'
 import GaleriaPaciente from './assets/components/GaleriaPaciente'
+import FullTurnos from './assets/components/FullTurnos'
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
         <Route path="/atenciones" element={<FormAtenciones />} />
         <Route path="/editar-paciente" element={<EditarPaciente />} />
         <Route path="/galeria" element={<GaleriaPaciente />} />
+        <Route path="/turnos" element={<FullTurnos/>} />
+        <Route path="*" element={<div className="p-4">Página no encontrada</div>} />
       </Routes>
     </Router>
   )
