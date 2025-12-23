@@ -6,183 +6,98 @@ dayjs.locale('es');
 
 export default function Turnos() {
   const [turnos, setTurnos] = useState([]);
-  const [cuil, setCuil] = useState('');
-  const [fecha, setFecha] = useState('');
-  const [hora, setHora] = useState('');
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [idTurnoEditando, setIdTurnoEditando] = useState(null);
-  const [error, setError] = useState('');
+  const [now, setNow] = useState(dayjs()); // ⏱️ Estado que actualiza cada minuto
 
   useEffect(() => {
     fetchTurnos();
   }, []);
 
+  // 🔁 Actualiza la hora actual cada 60 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(dayjs());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchTurnos = async () => {
     try {
       const res = await axios.get('http://localhost:8001/api/turnos');
-      setTurnos(res.data);
+      setTurnos(res.data || []);
     } catch (error) {
       console.error('Error al cargar turnos:', error);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const hoy = dayjs().format('YYYY-MM-DD');
+  const manana = dayjs().add(1, 'day').format('YYYY-MM-DD');
 
-    if (!cuil.trim() || !fecha || !hora) {
-      setError('Todos los campos son obligatorios');
-      return;
-    }
+  const turnosFiltrados = turnos.filter(t => t.fecha === hoy || t.fecha === manana);
 
-    setError('');
-
-    const turnoPost = {
-      paciente: cuil.trim(),
-      fecha,
-      hora,
-    };
-
-    try {
-      if (modoEdicion) {
-        await axios.put(
-          `http://localhost:8001/api/turno/${idTurnoEditando}`,
-          turnoPost
-        );
-        setModoEdicion(false);
-        setIdTurnoEditando(null);
-      } else {
-        await axios.post('http://localhost:8001/api/turno', turnoPost);
-      }
-
-      setCuil('');
-      setFecha('');
-      setHora('');
-      fetchTurnos();
-    } catch (error) {
-      console.error('Error al guardar turno:', error);
-    }
-  };
-
-  const handleEditar = (turno) => {
-    setCuil(turno.paciente);
-    setFecha(turno.fecha);
-    setHora(turno.hora);
-    setModoEdicion(true);
-    setIdTurnoEditando(turno.id_turno);
-  };
-
-  const handleEliminar = async (id_turno) => {
-    try {
-      await axios.delete(`http://localhost:8001/api/turno/${id_turno}`);
-      fetchTurnos();
-    } catch (error) {
-      console.error('Error al eliminar turno:', error);
-    }
-  };
-
-  const cancelarEdicion = () => {
-    setModoEdicion(false);
-    setIdTurnoEditando(null);
-    setCuil('');
-    setFecha('');
-    setHora('');
-  };
-
-  // 🔵 Agrupamos turnos por fecha real YYYY-MM-DD
-  const turnosPorDia = turnos.reduce((acc, turno) => {
+  const turnosPorDia = turnosFiltrados.reduce((acc, turno) => {
     if (!acc[turno.fecha]) acc[turno.fecha] = [];
     acc[turno.fecha].push(turno);
     return acc;
   }, {});
 
-  // Convertir YYYY-MM-DD → "Sábado 26/07"
   const formatearFecha = (fecha) =>
-    dayjs(fecha).format("dddd DD/MM").replace(/^\w/, c => c.toUpperCase());
+    dayjs(fecha).format("dddd DD/MM").replace(/^[a-z]/, (c) => c.toUpperCase());
+
+  // ---------- lógica para identificar la franja de 30 minutos actual ----------
+  const minutoSlot = now.minute() < 30 ? 0 : 30;
+  const slotNowStr = now.minute(minutoSlot).second(0).format('HH:mm');
+
+  const turnoActual = turnosFiltrados.find(
+    t => t.fecha === hoy && String(t.hora).startsWith(slotNowStr)
+  ) || null;
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="bg-white rounded-2xl p-4 w-full shadow-md flex flex-col justify-between h-full">
 
-      <div className="overflow-y-auto max-h-[500px] pr-2">
+      <div className="overflow-y-auto max-h-[650px] pr-2">
         {Object.entries(turnosPorDia).map(([fecha, lista]) => (
           <div key={fecha} className="mb-4">
-            <h2 className="font-bold text-lg mb-2">
-              {formatearFecha(fecha)}
-            </h2>
+            <h2 className="font-bold text-lg mb-2">{formatearFecha(fecha)}</h2>
 
             <div className="flex flex-col gap-1">
-              {lista.map((turno) => (
-                <div key={turno.id_turno} className="flex items-center justify-between">
-                  <span className="text-green-700 font-medium">
-                    {turno.hora.slice(0, 5)}
-                  </span>
+              {lista.map((turno) => {
+                const isActivo =
+                  turnoActual && turno.id_turno === turnoActual.id_turno;
 
-                  <span className="text-gray-600">
-                    {turno.paciente}
-                  </span>
+                const isActivoAlt =
+                  !turnoActual &&
+                  turno.fecha === hoy &&
+                  String(turno.hora).startsWith(slotNowStr);
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditar(turno)}
-                      className="p-2 text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      <i className="fas fa-pen"></i>
-                    </button>
-
-                    <button
-                      onClick={() => handleEliminar(turno.id_turno)}
-                      className="p-2 text-red-600 hover:text-red-800 transition-colors"
-                    >
-                      <i className="fas fa-trash"></i>
-                    </button>
+                return (
+                  <div
+                    key={turno.id_turno ?? `${turno.fecha}-${turno.hora}`}
+                    className={`flex items-center justify-between p-2 rounded ${
+                      isActivo || isActivoAlt
+                        ? 'border-2 border-blue-600 bg-blue-50 shadow-sm'
+                        : ''
+                    }`}
+                  >
+                    <span className="text-green-700 font-medium">
+                      {String(turno.hora).slice(0, 5)}
+                    </span>
+                    <span className="text-gray-600">{turno.paciente}</span>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
 
-      {error && (
-        <div className="text-red-600 font-semibold bg-red-100 border border-red-400 p-2 rounded">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-2">
-        <input
-          type="text"
-          value={cuil}
-          onChange={(e) => setCuil(e.target.value)}
-          placeholder="Nombre del paciente"
-          className="border p-2 rounded"
-        />
-        <input
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-          className="border p-2 rounded"
-        />
-        <input
-          type="time"
-          value={hora}
-          onChange={(e) => setHora(e.target.value)}
-          className="border p-2 rounded"
-        />
-
-        <button type="submit" className="bg-blue-500 text-white py-2 rounded">
-          {modoEdicion ? 'Editar turno' : 'Agregar turno'}
-        </button>
-
-        {modoEdicion && (
-          <button
-            type="button"
-            onClick={cancelarEdicion}
-            className="text-sm text-red-500 underline mt-1"
-          >
-            Cancelar edición
-          </button>
-        )}
-      </form>
+      <button
+        onClick={() => window.location.href = '/turnos'}
+        className="mt-4 bg-blue-600 text-white py-3 rounded-lg font-semibold text-center"
+      >
+        Ir a Agenda
+      </button>
     </div>
   );
 }

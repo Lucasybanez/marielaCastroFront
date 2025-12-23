@@ -195,36 +195,38 @@ export default function PacienteDatos() {
               <th className="border px-4 py-2">Lesión</th>
               <th className="border px-4 py-2">Observaciones</th>
               <th className="border px-4 py-2">Importe</th>
-              <th className="border px-4 py-2">Pagos</th>
               <th className="border bg-red-500 px-4 py-2">Saldo</th>
+              <th className="border bg-green-600 px-4 py-2">Pagos</th>
             </tr>
           </thead>
           <tbody>
             {atenciones.length > 0 ? (
-              atenciones.map((a, index) => (
+  atenciones.map((a, index) => (
                 <tr key={index}>
                   <td className="border px-4 py-2 h-10">{a.fecha}</td>
                   <td className="border px-4 py-2">{a.prestacion}</td>
                   <td className="border px-4 py-2">{a.lesion}</td>
                   <td className="border px-4 py-2">{a.observaciones}</td>
                   <td className="border px-4 py-2">${parseInt(a.importe).toLocaleString('es-AR')}</td>
-                  <td className="border px-4 py-2 flex items-center justify-between">
+
+                  <td className="border px-4 py-2">
                     ${parseInt(a.pagado).toLocaleString('es-AR')}
+                  </td>
+
+
+                  {/* 👉 COLUMNA NUEVA: VER MÁS */}
+                  <td className="border px-4 py-2 text-center">
                     <button
-                      onClick={() => {
-                        setPagoActual(a.pagado)
-                        setNuevoPago('')
-                        setAunDebe(parseInt(a.importe) - parseInt(a.pagado))
-                        setAtencionSeleccionada(a)
-                        setShowModal(true)
-                      }}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
-                      title="Editar pago"
+                      onClick={() =>
+                        navigate("/pagos", {
+                          state: { atencion: a, paciente: paciente }
+                        })
+                      }
+                      className="bg-blue-500 text-white py-1 px-3 rounded"
                     >
-                      ✏️
+                      Ver más
                     </button>
                   </td>
-                  <td className="border px-4 py-2">${parseInt(a.importe - a.pagado).toLocaleString('es-AR')}</td>
                 </tr>
               ))
             ) : (
