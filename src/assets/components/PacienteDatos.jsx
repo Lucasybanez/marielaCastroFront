@@ -38,11 +38,9 @@ export default function PacienteDatos() {
   }, [paciente])
 
   const cargarAtenciones = () => {
-    axios.get('http://localhost:8001/api/atenciones')
+    axios.get(`http://localhost:8001/api/atenciones/paciente/${paciente.cuil}`)
       .then(response => {
-        const filtradas = response.data.filter(a => a.id_paciente === paciente.cuil)
-        setAtenciones(filtradas)
-        console.log("ATENCIONES->", filtradas)
+        setAtenciones(response.data)
       })
       .catch(error => console.error('Error al cargar atenciones:', error))
   }
@@ -210,7 +208,7 @@ export default function PacienteDatos() {
                   <td className="border px-4 py-2">${parseInt(a.importe).toLocaleString('es-AR')}</td>
 
                   <td className="border px-4 py-2">
-                    ${parseInt(a.pagado).toLocaleString('es-AR')}
+                    ${parseInt(a.saldo_pendiente).toLocaleString('es-AR')}
                   </td>
 
 
